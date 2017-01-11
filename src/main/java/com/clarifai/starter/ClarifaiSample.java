@@ -62,14 +62,19 @@ public class ClarifaiSample {
     if (imageURL == null) {
       throw new NullPointerException("imageURL must not be null");
     }
-    ClarifaiResponse<List<ClarifaiOutput<Concept>>> response =
-        clarifaiClient.getDefaultModels().generalModel().predict()
-            .withInputs(ClarifaiInput.forImage(ClarifaiImage.of(imageURL)))
-            .executeSync();
+    ClarifaiResponse<List<ClarifaiOutput<Concept>>> response = clarifaiClient
+        .getDefaultModels().generalModel() // gets the core concept-recognizing Clarifai model
+        .predict() // Start building a request to predict
+        .withInputs(ClarifaiInput.forImage(ClarifaiImage.of(imageURL))) // add an image to tag. More images could be predicted within this same request if desired
+        .executeSync();
+
+    // API calls could fail for a number of reasons (network issues, bad inputs, Clarifai server issues, etc)
     if (!response.isSuccessful()) {
       System.out.println("Response wasn't successful! Error: " + response.getStatus());
       return;
     }
+
+    // If we got to here, the API call was successful, so we can retrieve the value of the response safely
     List<ClarifaiOutput<Concept>> outputs = response.get();
 
     // If you had predicted with more than one image, you would have one output for each of the input images, with the
